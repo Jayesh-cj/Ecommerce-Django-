@@ -7,4 +7,4 @@ class BaseModel(models.Model):
     updated_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        abstract =True
+        abstract = True
