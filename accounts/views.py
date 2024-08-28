@@ -13,10 +13,7 @@ def login_page(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
 
-        user_obj = User.objects.filter(
-            email = email,
-            password = password
-        )
+        user_obj = User.objects.filter(username = email)
 
         if not user_obj.exists():
             messages.warning(request, 'Account not found!')
@@ -28,13 +25,14 @@ def login_page(request):
 
         else :
             user_obj = authenticate(
-                email = email,
+                request,
+                username = email,
                 password = password
             )
 
             if user_obj:
                 login(request, user_obj)
-                return redirect('/')
+                return redirect('')
 
     return render(request, 'accounts/login.html')
 
