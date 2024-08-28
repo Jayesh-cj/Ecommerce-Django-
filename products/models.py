@@ -21,15 +21,21 @@ class Category(BaseModel):
 
 
 # Different color of products model
-class ColorVarient(BaseModel):
+class ColorVariant(BaseModel):
     color_name = models.CharField(max_length=100)
     price = models.IntegerField(default=0)
 
+    def __str__(self) -> str:
+        return self.color_name
+
 
 # Different Size of products model 
-class SizeVariennt(BaseModel):
+class SizeVariant(BaseModel):
     size_name = models.CharField(max_length=100)
     price = models.IntegerField(default=0)
+
+    def __str__(self) -> str:
+        return self.size_name
 
 
 # Product model 
@@ -39,8 +45,8 @@ class Product(BaseModel):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     price = models.IntegerField()
     product_description = models.TextField()
-    color_varient = models.ManyToManyField(ColorVarient)
-    size_varient = models.ManyToManyField(SizeVariennt)
+    color_varient = models.ManyToManyField(ColorVariant, blank=True)
+    size_varient = models.ManyToManyField(SizeVariant, blank=True)
 
 
 
@@ -48,13 +54,19 @@ class Product(BaseModel):
         self.slug = slugify(self.product_name)
         super(Product, self).save(*args, **kwargs)
 
+    
     def __str__(self) -> str:
         return self.product_name
     
+    
+    # Fetch product price by there size
+    def get_product_by_size(self, size):
+        return self.price + SizeVariant.objects.get(size_name = size).price
+
+
 
 
 # Product Images 
 class ProductImage(BaseModel):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_images')
     image = models.ImageField(upload_to='Files\Product')
-
