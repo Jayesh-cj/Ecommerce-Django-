@@ -4,6 +4,7 @@ from .models import *
 # Register your models here.
 
 admin.site.register(Category)
+admin.site.register(Coupon)
 
 
 # Changing admin panel view to upload ProductImages with Product

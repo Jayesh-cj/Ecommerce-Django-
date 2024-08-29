@@ -6,7 +6,7 @@ from django.dispatch import receiver
 
 from base.mdels import BaseModel
 from base.email import send_account_activate_email
-from products.models import ColorVariant, Product, SizeVariant
+from products.models import ColorVariant, Coupon, Product, SizeVariant
 
 # Create your models here.
 
@@ -27,6 +27,7 @@ class Profile(BaseModel):
 # Cart Model 
 class Cart(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='carts')
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True)
     is_paid = models.BooleanField(default=False)
 
     # Total cart prie 
@@ -44,7 +45,11 @@ class Cart(BaseModel):
                 size_variant_price = cart_item.size_variant.price
                 price.append(size_variant_price)
         
-        return sum(price)
+        if self.coupon:
+            if self.coupon.minimum_amount < sum(price):
+                return sum(price) - self.coupon.discount_price
+        else:        
+            return sum(price)
 
 
 
