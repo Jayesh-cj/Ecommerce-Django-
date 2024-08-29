@@ -34,7 +34,7 @@ def login_page(request):
 
             if user_obj:
                 login(request, user_obj)
-                return redirect('/')
+                return redirect('homepage')
 
     return render(request, 'accounts/login.html')
 
