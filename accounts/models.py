@@ -59,14 +59,14 @@ class CartItems(BaseModel):
     def get_product_price(self):
         price = [self.product.price]
 
-        if self.color_varient:
-            color_variant_price = self.color_varient.price
+        if self.color_variant:
+            color_variant_price = self.color_variant.price
             price.append(color_variant_price)
 
-        if self.size_varient:
-            size_variant_price = self.size_varient.price
+        if self.size_variant:
+            size_variant_price = self.size_variant.price
             price.append(size_variant_price)
-        
+
         return sum(price)
     
 

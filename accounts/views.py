@@ -124,7 +124,25 @@ def remove_cart(request, cart_item_uid):
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
 
 
-# Cart 
+
+
 def cart(request):
-    context = { 'cart' : Cart.objects.filter(is_paid = False, user = request.user) }
+    cart = Cart.objects.filter(is_paid=False, user=request.user).first()
+
+    if cart:
+        cart_items = cart.cart_item.all()
+        total_price = cart.get_cart__total_price()
+
+        context = {
+            'cart': cart,
+            'cart_items': cart_items,
+            'total_price': total_price,
+        }
+    else:
+        context = {
+            'cart': None,
+            'cart_items': None,
+            'total_price': 0,
+        }
+
     return render(request, 'accounts/cart.html', context)
