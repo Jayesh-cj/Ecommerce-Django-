@@ -3,7 +3,9 @@ from django.shortcuts import redirect, render
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from .models import Profile
+
+from products.models import Product, SizeVariant
+from .models import CartItems, Profile, Cart
 
 # Create your views here.
 
@@ -32,7 +34,7 @@ def login_page(request):
 
             if user_obj:
                 login(request, user_obj)
-                return redirect('')
+                return redirect('/')
 
     return render(request, 'accounts/login.html')
 
@@ -84,3 +86,45 @@ def activate_account(request, email_token):
         return redirect('/')
     except Exception as e:
         return HttpResponse('Invalid email token')
+
+
+# Add item to cart 
+def add_to_cart(request, uid):
+    variant = request.GET.get('variant')
+    product = Product.objects.get(uid=uid)
+    user = request.user
+
+    cart, _ = Cart.objects.get_or_create(
+        user = user,
+        is_paid = False
+    )
+
+    cart_item = CartItems.objects.create(
+        cart = cart,
+        product = product
+    )
+
+    if variant:
+        variant = request.GET.get('variant')
+        size_variant = SizeVariant.objects.get(size_name = variant)
+        cart_item.size_varient = size_variant
+        cart_item.save()
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+# Remove item from cart
+def remove_cart(request, cart_item_uid):
+    try:
+        cart_item = CartItems.objects.get(uid = cart_item_uid)
+        cart_item.delete()
+    except Exception as e:
+        print(e)
+    
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+# Cart 
+def cart(request):
+    context = { 'cart' : Cart.objects.filter(is_paid = False, user = request.user) }
+    return render(request, 'accounts/cart.html', context)

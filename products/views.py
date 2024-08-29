@@ -1,6 +1,5 @@
 from django.shortcuts import render
-
-from products.models import Product, SizeVariant
+from products.models import Product
 
 # Create your views here.
 
@@ -20,4 +19,5 @@ def  get_product(request, slug):
         return render(request, 'product/product.html',context = context )
     except Exception as e:
         print(f"\n\nException : {e}\n\n")
+
 

@@ -6,6 +6,7 @@ from django.dispatch import receiver
 
 from base.mdels import BaseModel
 from base.email import send_account_activate_email
+from products.models import ColorVariant, Product, SizeVariant
 
 # Create your models here.
 
@@ -16,6 +17,58 @@ class Profile(BaseModel):
     email_token = models.CharField(max_length=100, null=True, blank=True)
     profile_image = models.ImageField(upload_to='Foles/Profile')
 
+
+    # Cart Count get 
+    def get_cart_count(self):
+        return CartItems.objects.filter(cart__is_paid = False, cart__user = self.user).count()
+
+
+
+# Cart Model 
+class Cart(BaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='carts')
+    is_paid = models.BooleanField(default=False)
+
+    # Total cart prie 
+    def get_cart__total_price(self):
+        cart_items = self.cart_item.all()
+        price = []
+        for cart_item in cart_items:
+            price.append(cart_item.product.price)
+
+            if cart_item.color_variant:
+                color_variant_price = cart_item.color_variant.price
+                price.append(color_variant_price)
+
+            if cart_item.size_variant:
+                size_variant_price = cart_item.size_variant.price
+                price.append(size_variant_price)
+        
+        return sum(price)
+
+
+
+
+class CartItems(BaseModel):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='cart_item')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
+    color_variant = models.ForeignKey(ColorVariant, on_delete=models.SET_NULL, null=True, blank=True)
+    size_variant = models.ForeignKey(SizeVariant, on_delete=models.SET_NULL, null=True, blank=True)
+
+    
+    def get_product_price(self):
+        price = [self.product.price]
+
+        if self.color_varient:
+            color_variant_price = self.color_varient.price
+            price.append(color_variant_price)
+
+        if self.size_varient:
+            size_variant_price = self.size_varient.price
+            price.append(size_variant_price)
+        
+        return sum(price)
+    
 
 
 @receiver(post_save, sender = User)
